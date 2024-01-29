@@ -6,8 +6,8 @@ import (
 	"regexp"
 )
 
-// Ipv6 返回本地分配的 ipv6
-func Ipv6(ipv6Type string) string {
+// Ipv6 返回本地分配的 ipv6, 可能多个值
+func Ipv6(ipv6Type string) []string {
 	var reMatch string
 	if ipv6Type == "fixed" {
 		reMatch = `inet6 ([^f:][\da-f:]+)/\d+ scope global.?\n.+?valid_lft forever preferred_lft forever`
@@ -20,22 +20,21 @@ func Ipv6(ipv6Type string) string {
 	bytes, err := cmd.Output()
 	if err != nil {
 		log.Println("command err:", err)
-		return ""
+		return []string{}
 	}
 	resp := string(bytes)
 
 	re := regexp.MustCompile(reMatch)
 	if re == nil {
 		log.Println("regexp err")
-		return ""
+		return []string{}
 	}
 
 	result := re.FindStringSubmatch(resp)
 
-	if result == nil || len(result) == 0 {
+	if len(result) == 0 {
 		log.Println("match err")
-		return ""
 	}
 
-	return result[1]
+	return result
 }
