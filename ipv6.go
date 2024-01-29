@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-	"main/localip"
 	"net/http"
 
+	"github.com/uees/ipv6/local"
 	"github.com/xjh22222228/ip"
 )
 
@@ -23,7 +24,10 @@ func getIPV6ByNet(writer http.ResponseWriter, request *http.Request) {
 func getIPV6ByShell(writer http.ResponseWriter, request *http.Request) {
 	request.ParseForm()
 	ipv6Type := request.Form.Get("type")
-	ipv6 := localip.Ipv6(ipv6Type)
+	ipv6, err := local.Ipv6(ipv6Type)
+	if err != nil {
+		fmt.Fprintf(writer, "ERROR: %s", err)
+	}
 
 	if len(ipv6) == 0 {
 		fmt.Fprintf(writer, "ERROR: %s", "not get ipv6")
@@ -37,7 +41,12 @@ func getIPV6ByShell(writer http.ResponseWriter, request *http.Request) {
 func main() {
 	http.HandleFunc("/ipv6-request-net", getIPV6ByNet)
 	http.HandleFunc("/ipv6", getIPV6ByShell)
-	err := http.ListenAndServe(":9090", nil)
+
+	var addr string
+	flag.StringVar(&addr, "addr", ":9090", "http listen address")
+	flag.Parse()
+
+	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

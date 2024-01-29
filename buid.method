@@ -1,0 +1,12 @@
+// CMD
+SET CGO_ENABLED=0
+set GOARCH=amd64
+set GOOS=linux
+
+// powershell
+$env:CGO_ENABLED="0"
+$env:GOOS="linux"
+$env:GOARCH="amd64"
+
+// 开始编译
+go build -o ./build/ ./ipv6.go
